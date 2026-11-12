@@ -200,12 +200,4 @@ This prototype is for monitoring and demonstration. It is not a certified protec
 - Transformer limits and forecasts are illustrative until utility/network data is available.
 - The current profile, notes, and device data can be cleared by clearing browser storage.
 
-## Recommended next implementation phase
 
-1. Connect an ESP32 with CT clamps and safe signal conditioning.
-2. Send signed readings over MQTT or HTTPS.
-3. Add a backend API and database for users, homes, channels, readings, notes, and alerts.
-4. Store source metadata, timestamps, calibration state, and quality flags for every reading.
-5. Replace simulated Telemetry Trust with freshness, completeness, timestamp, signal-quality, and replay-protection checks.
-6. Add a real transformer/feeder capacity model supplied by the utility or a qualified electrical engineer.
-7. Evaluate forecast error, alert precision, data freshness, transaction completion, and operator response time.
