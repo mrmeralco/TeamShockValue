@@ -9,12 +9,13 @@ const DEFAULT_DEVICES = [
   { id: 'ch-05', name: 'Water heater', room: 'Bathroom', channel: 'CH 05', power: 0.00, status: 'OFF · 8h 12m', tone: 'sun', icon: '◒' },
   { id: 'ch-08', name: 'Bedroom outlets', room: 'Bedroom', channel: 'CH 08', power: 0.18, status: 'ON · 4 devices', tone: 'purple', icon: '⌁' }
 ];
-const storageKeys = { devices: 'shockvalue.devices', history: 'shockvalue.history', user: 'shockvalue.user' };
+const storageKeys = { devices: 'shockvalue.devices', history: 'shockvalue.history', user: 'shockvalue.user', notes: 'shockvalue.notes' };
 function load(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
 function save(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 function escapeHtml(value) { return String(value).replace(/[&<>\"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#039;' }[char])); }
 let devices = load(storageKeys.devices, DEFAULT_DEVICES);
 let readingsHistory = load(storageKeys.history, []);
+let notes = load(storageKeys.notes, []);
 
 const dialog = document.querySelector('#appDialog');
 const dialogContent = document.querySelector('#dialogContent');
@@ -34,7 +35,23 @@ function updateLiveCards() {
   const usage = document.querySelector('#todayUsage'); if (usage) usage.textContent = (18.6 + Math.max(0, total - 1.73) * .12).toFixed(1);
   const sync = document.querySelector('#lastSynced'); if (sync) sync.textContent = 'just now';
 }
-function addHistorySnapshot() { readingsHistory = [...readingsHistory, { time: new Date().toISOString(), total: devices.reduce((sum, device) => sum + Number(device.power || 0), 0) }].slice(-720); save(storageKeys.history, readingsHistory); }
+function addHistorySnapshot() { readingsHistory = [...readingsHistory, { time: new Date().toISOString(), total: devices.reduce((sum, device) => sum + Number(device.power || 0), 0) }].slice(-720); save(storageKeys.history, readingsHistory); updateGridIntelligence(); }
+function updateGridIntelligence(forcePeak = false) {
+  const total = devices.reduce((sum, device) => sum + Number(device.power || 0), 0);
+  const load = forcePeak ? Math.min(94, 72 + total * 4) : Math.min(92, Math.round(total / 7.4 * 100));
+  const headroom = forcePeak ? Math.max(.18, 7.4 - total * 1.5) : Math.max(.2, 7.4 - total);
+  const forecast = forcePeak ? total * 1.35 : total * (1 + Math.max(0, load - 35) / 400);
+  const trust = forcePeak ? 91 : Math.max(86, Math.round(98 - Math.random() * 4));
+  const danger = forcePeak || load >= 75;
+  const set = (id, value) => { const element = document.querySelector(id); if (element) element.textContent = value; };
+  set('#transformerLoad', `${load}%`); set('#headroom', `${headroom.toFixed(2)} kW`); set('#forecastLoad', `${forecast.toFixed(2)} kW`); set('#telemetryTrust', `${trust}%`);
+  set('#thermalCopy', danger ? 'Watch thermal envelope' : 'Normal thermal band'); set('#forecastCopy', danger ? 'Peak risk in next 60 min' : 'Trend-based estimate'); set('#telemetryCopy', trust < 94 ? 'One sample needs review' : 'Fresh sensor samples');
+  const measuredCost = document.querySelector('#measuredCost'); const unmappedCost = document.querySelector('#unmappedCost'); const totalBill = 3842; const measured = Math.min(totalBill, Math.round(total * 720 / 30 * 11.47)); if (measuredCost) measuredCost.textContent = `₱${measured.toLocaleString()}`; if (unmappedCost) unmappedCost.textContent = `₱${Math.max(0, totalBill - measured).toLocaleString()}`;
+  const badge = document.querySelector('#gridStatusBadge'); const statusText = document.querySelector('#gridStatusText'); if (badge && statusText) { badge.classList.toggle('alert', danger); badge.classList.toggle('stable', !danger); statusText.textContent = danger ? 'WATCH' : 'STABLE'; }
+  const alert = document.querySelector('#gridAlert'); if (alert) alert.innerHTML = danger ? '<span>!</span><div><strong>Neighborhood peak risk detected</strong><small>Shift flexible loads or delay the water heater to protect local headroom.</small></div>' : '<span>✓</span><div><strong>No local constraint detected</strong><small>All monitored circuits are inside their expected envelope.</small></div>';
+  set('#gridEventTitle', danger ? 'Peak event — response suggested' : 'Grid pulse monitoring'); set('#gridEventCopy', danger ? 'Digital twin predicts the local transformer may cross its preferred operating band.' : 'The prototype is comparing live load against a safe local transformer envelope.'); set('#gridEventState', danger ? 'ACTION' : 'MONITORING');
+}
+
 function simulateLiveReadings() { devices = devices.map(device => ({ ...device, power: Math.max(0, Number((Number(device.power) + (Math.random() - .48) * .04).toFixed(2))) })); save(storageKeys.devices, devices); renderDevices(); addHistorySnapshot(); }
 function addDevice() {
   dialogContent.innerHTML = `<h3>Add a breaker channel</h3><p>Label a CT clamp now. The reading will appear on the Overview page and be retained in history.</p><form id="deviceForm" class="modal-form"><label>Appliance name<input name="name" required placeholder="e.g. Washing machine" /></label><label>Room or circuit<input name="room" required placeholder="e.g. Utility room" /></label><label>Breaker channel<select name="channel"><option>CH 03</option><option>CH 04</option><option>CH 06</option><option>CH 07</option><option>CH 09</option><option>CH 10</option><option>CH 11</option><option>CH 12</option><option>CH 13</option><option>CH 14</option></select></label><button class="button button-primary" type="submit">Save device</button></form>`;
@@ -47,6 +64,12 @@ function editDevice(id) {
   dialog.showModal();
   document.querySelector('#editDeviceForm').addEventListener('submit', event => { event.preventDefault(); const form = new FormData(event.currentTarget); device.name = form.get('name'); device.room = form.get('room'); save(storageKeys.devices, devices); renderDevices(); dialog.close(); });
   document.querySelector('#removeDeviceButton').addEventListener('click', () => { devices = devices.filter(item => item.id !== id); save(storageKeys.devices, devices); renderDevices(); dialog.close(); });
+}
+function loadProfile() {
+  const profile = load('shockvalue.profile', { username: 'Ari Santos', userId: '#123456789', email: 'ari.santos@example.com' });
+  const username = document.querySelector('#profileUsername'); const userId = document.querySelector('#profileUserId'); const email = document.querySelector('#profileEmail');
+  if (username) username.value = profile.username; if (userId) userId.value = profile.userId; if (email) email.value = profile.email;
+  const initials = document.querySelector('#profileInitials'); if (initials) initials.textContent = profile.username.split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase();
 }
 function showAuth() {
   dialogContent.innerHTML = `<h3>Welcome to Shockvalue</h3><p>Sign in to keep your labels and weekly history in this browser.</p><div class="auth-tabs"><button class="auth-tab active" data-auth-mode="login">Login</button><button class="auth-tab" data-auth-mode="signup">Sign up</button></div><form id="authForm" class="modal-form"><label>Email<input name="email" type="email" required placeholder="you@example.com" /></label><label>Password<input name="password" type="password" required minlength="6" placeholder="At least 6 characters" /></label><button class="button button-primary" type="submit">Continue</button></form>`;
@@ -108,17 +131,38 @@ document.querySelector('#allDevicesButton').addEventListener('click', () => open
 document.querySelector('#addDeviceButton').addEventListener('click', addDevice);
 document.querySelector('#addDeviceInlineButton').addEventListener('click', addDevice);
 document.querySelector('#authButton').addEventListener('click', showAuth);
-document.querySelector('#logObservationButton').addEventListener('click', () => openDialog('Log a field observation', 'Capture what happened on-site so your usage data has context.', [['Observation type', 'Appliance / meter / outage'], ['Photo', 'Optional'], ['Location', 'San Juan home']]));
+document.querySelector('#profileForm').addEventListener('submit', event => { event.preventDefault(); const form = new FormData(event.currentTarget); const profile = { username: form.get('username'), userId: form.get('userId'), email: form.get('email') }; save('shockvalue.profile', profile); document.querySelector('#profileInitials').textContent = profile.username.split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase(); document.querySelector('#profileStatus').textContent = 'Profile saved locally.'; });
+document.querySelector('#logoutButton').addEventListener('click', () => { localStorage.removeItem(storageKeys.user); document.querySelector('#authButton').textContent = 'Sign in'; window.location.hash = 'overview'; openDialog('Logged out', 'Your local session has been cleared.'); });
+function renderNotes() {
+  const list = document.querySelector('#savedNotes'); const count = document.querySelector('#noteCount'); if (!list) return;
+  if (count) count.textContent = `${notes.length} note${notes.length === 1 ? '' : 's'}`;
+  list.innerHTML = notes.length ? notes.slice().reverse().map(note => `<article class="saved-note" data-note-id="${escapeHtml(note.id)}"><p>${escapeHtml(note.text)}</p><div class="saved-note-meta"><span>${escapeHtml(note.when ? new Date(note.when).toLocaleString() : 'Just now')}</span><span>Click to edit</span></div></article>`).join('') : '<div class="empty-notes">Your saved notes will appear here.</div>';
+  list.querySelectorAll('.saved-note').forEach(item => item.addEventListener('click', () => editNote(item.dataset.noteId)));
+}
+function openNoteForm(prefill = '', existing = null) {
+  dialogContent.innerHTML = `<h3>${existing ? 'Edit your note' : 'Write a quick note'}</h3><p>What happened? A short note helps explain changes in your electricity use.</p><form id="noteForm" class="modal-form"><label>Your note<textarea name="note" rows="4" required placeholder="Example: Turned on the air conditioner at 2:00 PM">${escapeHtml(existing ? existing.text : prefill)}</textarea></label><label>When did it happen?<input name="when" type="datetime-local" value="${existing && existing.when ? new Date(existing.when).toISOString().slice(0, 16) : ''}" /></label><button class="button button-primary" type="submit">${existing ? 'Save changes' : 'Save note'}</button>${existing ? '<button class="button button-secondary" type="button" id="deleteNoteButton">Delete note</button>' : ''}</form>`;
+  dialog.showModal();
+  document.querySelector('#noteForm').addEventListener('submit', event => { event.preventDefault(); const form = new FormData(event.currentTarget); const updated = { id: existing ? existing.id : `note-${Date.now()}`, text: form.get('note'), when: form.get('when') || new Date().toISOString() }; if (existing) notes = notes.map(note => note.id === existing.id ? updated : note); else notes.push(updated); save(storageKeys.notes, notes); renderNotes(); dialog.close(); });
+  if (existing) document.querySelector('#deleteNoteButton').addEventListener('click', () => { notes = notes.filter(note => note.id !== existing.id); save(storageKeys.notes, notes); renderNotes(); dialog.close(); });
+}
+function editNote(id) { const note = notes.find(item => item.id === id); if (note) openNoteForm('', note); }
+document.querySelector('#logObservationButton').addEventListener('click', () => openNoteForm());
+document.querySelector('#logObservationInlineButton').addEventListener('click', () => openNoteForm());
+document.querySelectorAll('.note-example').forEach(button => button.addEventListener('click', () => openNoteForm(button.dataset.note)));
 document.querySelector('#exportButton').addEventListener('click', () => {
   const report = 'Meralco Shockvalue — Energy report\n\nLive power: 2.84 kW\nToday: 18.6 kWh\nEstimated bill: ₱3,842\nCarbon avoided: 12.4 kg\n';
   const blob = new Blob([report], { type: 'text/plain' });
   const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'meralco-shockvalue-report.txt'; link.click(); URL.revokeObjectURL(link.href);
 });
 document.querySelector('#applyTipButton').addEventListener('click', event => { event.currentTarget.textContent = 'Tip applied ✓'; event.currentTarget.disabled = true; });
+document.querySelector('#simulatePeakButton').addEventListener('click', () => { updateGridIntelligence(true); openDialog('Neighborhood peak simulation', 'A high-demand event was simulated. The digital twin recommends delaying flexible loads and notifying field operations.', [['Transformer load', document.querySelector('#transformerLoad').textContent], ['Headroom', document.querySelector('#headroom').textContent], ['Recommended action', 'Delay water heater / EV charging']]); });
 document.querySelector('#closeInsightButton').addEventListener('click', () => document.querySelector('.insight-strip').remove());
 
+loadProfile();
+renderNotes();
 renderDevices();
 renderChart();
 renderPage(window.location.hash.slice(1) || 'overview');
 addHistorySnapshot();
+updateGridIntelligence();
 window.setInterval(simulateLiveReadings, 5000);

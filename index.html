@@ -39,6 +39,7 @@
           <a class="nav-item" data-page-link="bill" href="#bill"><span class="nav-icon">▤</span><span>My bill</span></a>
           <a class="nav-item" data-page-link="devices" href="#devices"><span class="nav-icon">⌁</span><span>Devices</span></a>
           <a class="nav-item" data-page-link="observations" href="#observations"><span class="nav-icon">⌖</span><span>Field notes</span></a>
+          <a class="nav-item" data-page-link="profile" href="#profile"><span class="nav-icon">◎</span><span>Profile</span></a>
         </nav>
         <div class="sidebar-rule"></div>
         <div class="eyebrow">YOUR HOME</div>
@@ -56,6 +57,16 @@
 
       <main class="main-content" id="overview">
         <div class="page-banner" data-page-content="overview"><div><div class="eyebrow">CONTROL ROOM / OVERVIEW</div><h2>Live energy, without the guesswork.</h2><p>Track every configured breaker as it changes, then jump into history, billing, devices, or field notes.</p></div><span class="page-chip">LIVE</span></div>
+        <section class="profile-page page-section" data-page-content="profile" id="profile">
+          <div class="profile-header"><div><div class="eyebrow">ACCOUNT / USER PROFILE</div><h2>Your profile</h2><p>Keep your account details current for reports, device ownership, and future alerts.</p></div><div class="profile-avatar-large" id="profileInitials">AS</div></div>
+          <form id="profileForm" class="profile-form">
+            <label>Username<input id="profileUsername" name="username" value="Ari Santos" required /></label>
+            <label>UserID<input id="profileUserId" name="userId" value="#123456789" readonly /></label>
+            <label>Email<input id="profileEmail" name="email" type="email" value="ari.santos@example.com" required /></label>
+            <div class="profile-actions"><button class="button button-primary" type="submit">Save changes</button><button class="button button-secondary" type="button" id="logoutButton">Logout</button></div>
+            <p class="profile-status" id="profileStatus" role="status"></p>
+          </form>
+        </section>
         <section class="hero-row page-section" data-page-content="overview">
           <div>
             <div class="kicker">THURSDAY, 12 NOVEMBER 2026 <span class="slash">/</span> 11:33 AM</div>
@@ -96,7 +107,22 @@
           </article>
         </section>
 
-        <section class="dashboard-grid">
+        <section class="grid-intelligence-panel page-section" data-page-content="overview" aria-label="Grid intelligence">
+          <div class="grid-panel-header">
+            <div><div class="eyebrow">CHALLENGE 03 / GRID INTELLIGENCE</div><h2>See the grid before it sees you.</h2><p>A lightweight digital twin watches demand, headroom, and telemetry confidence so the household can act before a local peak becomes a service problem.</p></div>
+            <div class="grid-status-badge stable" id="gridStatusBadge"><i></i><span id="gridStatusText">STABLE</span></div>
+          </div>
+          <div class="grid-metrics">
+            <div class="grid-metric"><span>TRANSFORMER LOAD</span><strong id="transformerLoad">38%</strong><small id="thermalCopy">Normal thermal band</small></div>
+            <div class="grid-metric"><span>AVAILABLE HEADROOM</span><strong id="headroom">2.73 kW</strong><small>Before demand response</small></div>
+            <div class="grid-metric"><span>NEXT 60 MIN FORECAST</span><strong id="forecastLoad">2.91 kW</strong><small id="forecastCopy">Trend-based estimate</small></div>
+            <div class="grid-metric"><span>TELEMETRY TRUST</span><strong id="telemetryTrust">96%</strong><small id="telemetryCopy">Fresh sensor samples</small></div>
+          </div>
+          <div class="grid-actions-row"><div class="grid-alert" id="gridAlert"><span>✓</span><div><strong>No local constraint detected</strong><small>All monitored circuits are inside their expected envelope.</small></div></div><button class="button button-secondary compact-button" id="simulatePeakButton">Simulate neighborhood peak</button></div>
+          <div class="grid-event" id="gridEventPanel"><span class="grid-event-icon">⌁</span><div><strong id="gridEventTitle">Grid pulse monitoring</strong><small id="gridEventCopy">The prototype is comparing live load against a safe local transformer envelope.</small></div><span class="event-state" id="gridEventState">MONITORING</span></div>
+        </section>
+
+        <section class="dashboard-grid" data-page-layout="usage-bill">
           <article class="panel usage-panel page-section" data-page-content="usage" id="usage">
             <div class="panel-heading">
               <div><div class="eyebrow">KNOW YOUR BILL / MANAGE YOUR USAGE</div><h2>Where your energy went</h2></div>
@@ -122,11 +148,16 @@
           </article>
 
           <article class="panel challenge-panel page-section" data-page-content="observations" id="observations">
-            <div class="page-note-grid"><div><div class="eyebrow">FIELD OBSERVATION LOG</div><h2>Context makes data useful.</h2><p>Record appliance changes, meter checks, outages, or unusual events so future consumption spikes are explainable.</p></div><button class="button button-dark" id="logObservationInlineButton">+ Add note</button></div>
-            <div class="challenge-top"><span class="challenge-number">02</span><div><div class="eyebrow">OFFICIAL HACKATHON CHALLENGE</div><h2>Know your bill.<br /><em>Manage your usage.</em></h2></div></div>
-            <p>From raw current to a confident decision. See what is costing you, why it changed, and what to do next.</p>
-            <div class="challenge-actions"><button class="button button-dark" id="logObservationButton">Log a field observation <span>→</span></button><span class="field-count">4 notes this week</span></div>
+            <div class="page-note-grid"><div><div class="eyebrow">FIELD NOTES</div><h2>What happened today?</h2><p>Write a quick note when you turn an appliance on, notice an unusual bill, or experience an outage. This helps explain changes in your usage.</p></div><button class="button button-dark" id="logObservationInlineButton">+ Add a note</button></div>
+            <div class="simple-note-examples"><span>Examples</span><button type="button" class="note-example" data-note="Turned on the air conditioner at 2:00 PM">Aircon turned on</button><button type="button" class="note-example" data-note="The power went out for 10 minutes">Short outage</button><button type="button" class="note-example" data-note="Used the washing machine twice today">Extra appliance use</button></div>
+            <div class="challenge-actions"><button class="button button-dark" id="logObservationButton">Write a note <span>→</span></button><span class="field-count" id="noteCount">0 notes</span></div>
+            <div class="saved-notes" id="savedNotes"><div class="empty-notes">Your saved notes will appear here.</div></div>
           </article>
+        </section>
+
+        <section class="page-section bill-extra-panel" data-page-content="bill" aria-label="Bill intelligence">
+          <div class="eyebrow">BILL TRANSPARENCY</div><h2>From measured load to estimated cost</h2><p>Each line item is traceable to a configured breaker. Unmapped usage remains visible instead of being guessed.</p>
+          <div class="bill-ledger"><div><span>Measured circuits</span><strong id="measuredCost">₱2,429</strong></div><div><span>Unmapped remainder</span><strong id="unmappedCost">₱1,413</strong></div><div><span>Rate assumption</span><strong>₱11.47 / kWh</strong></div></div>
         </section>
 
         <section class="insight-strip page-section" data-page-content="overview">
