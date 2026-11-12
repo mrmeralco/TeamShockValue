@@ -1,4 +1,4 @@
-# TeamShockValue — Meralco Shockvalue
+# Team ShockValue! — Watt's Up
 
 Meralco Shockvalue is a web prototype for making household electricity usage easier to understand. It combines breaker-level energy readings, usage history, bill estimates, and field observations in one dashboard.
 
