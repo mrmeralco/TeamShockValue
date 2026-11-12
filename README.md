@@ -15,7 +15,7 @@ Shockvalue combines data from connected breaker channels and a main-feed view to
 - Available headroom before a simulated local constraint
 - A next-60-minute demand forecast
 - Telemetry Trust, which indicates whether readings are fresh and consistent enough to use
-- A peak-event simulation with a recommended demand-response action
+    - Grid status and telemetry indicators for local operating awareness
 - An unmapped remainder so the system does not pretend to identify loads it cannot measure
 
 ## Core product idea
@@ -52,13 +52,12 @@ The homepage includes a lightweight digital-twin-style prototype with:
 - **Next 60-Minute Forecast:** trend-based projected load
 - **Telemetry Trust:** an indicator of data freshness and consistency
 - **Grid status:** `STABLE` or `WATCH`
-- **Peak simulation:** demonstrates a high-demand event and recommends delaying flexible loads such as a water heater or EV charger
 
 The current calculations are intentionally transparent and illustrative. Real deployments should use utility-provided feeder or transformer limits and authenticated telemetry.
 
 ### Breaker Channels
 
-The Devices section is presented as breaker-channel monitoring. Users can:
+The Channels section is presented as breaker-channel monitoring. Users can:
 
 - Add a channel
 - Name the appliance or load
@@ -67,7 +66,7 @@ The Devices section is presented as breaker-channel monitoring. Users can:
 - Edit the appliance name
 - Edit the room or circuit
 - Remove a mapping
-- View all currently mapped channels
+- View all currently mapped channels through CH 16
 
 The current readings are simulated so the interface can demonstrate live behavior. Device mappings are retained in browser storage.
 
@@ -108,18 +107,21 @@ Saved notes appear at the bottom of the Field Notes page. Clicking a note opens 
 
 Notes are persisted in the browser for the prototype.
 
-### User profile and account prototype
+### User accounts and authentication
 
 - Separate Profile page
 - Editable username
 - Read-only UserID
 - Editable email address
 - Save profile changes
-- Separate login page
-- Signup option
-- Logout behavior that clears the local session and returns to login
+- Public users are routed to a Laravel login page first
+- Separate signup page
+- Successful login or signup redirects to the dashboard
+- Logout invalidates the Laravel session and returns to login
+- The circular profile avatar reflects the signed-in user’s initials
+- User information is stored in Laravel’s SQLite database
 
-This is a frontend demonstration only. It is not production authentication.
+Passwords are stored as secure hashes. This is still a prototype and should add production hardening such as HTTPS, CSRF review, rate limiting, and managed backups before deployment.
 
 ### Other interactions
 
@@ -132,53 +134,62 @@ This is a frontend demonstration only. It is not production authentication.
 - Text report export
 - Responsive desktop and mobile layout
 
-## Data and prototype behavior
+## Laravel data and prototype behavior
 
-The browser stores prototype data in `localStorage`:
+The Laravel application stores user account data in:
 
-- Breaker-channel mappings
-- Simulated readings
-- Reading history snapshots
-- Field Notes
-- Profile details
-- Login session state
+- `database/database.sqlite`
+- `users` table for name, email, user ID, password hash, and timestamps
+- `sessions` table for server-side sessions
+
+The simulated dashboard readings, breaker-channel mappings, history, and field notes remain browser-side prototype data in `localStorage`.
 
 Readings update periodically to demonstrate a live dashboard. They are not actual electrical measurements until an ESP32/ESP8266 or other approved device is connected.
 
-## Project files
+## Laravel project files
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Page structure, navigation, dialogs, dashboard sections, forms, and accessible labels |
-| `styles.css` | Responsive layout, visual system, cards, charts, dialogs, forms, and mobile behavior |
-| `app.js` | Navigation, simulated readings, history persistence, device management, profile/auth flow, field notes, grid intelligence, and interactions |
+| `resources/views/dashboard.blade.php` | Dashboard page structure, navigation, dialogs, forms, and accessible labels |
+| `resources/views/auth/login.blade.php` | Login page |
+| `resources/views/auth/signup.blade.php` | Signup page |
+| `public/styles.css` | Responsive layout, visual system, cards, charts, dialogs, forms, and mobile behavior |
+| `public/app.js` | Navigation, simulated readings, device management, profile avatar, field notes, and interactions |
+| `app/Http/Controllers/AuthController.php` | Signup, login, profile, session, and logout behavior |
+| `app/Models/User.php` | Eloquent user model |
+| `database/migrations/` | User and session database schema |
+| `routes/web.php` | Login, signup, dashboard, and account routes |
 | `README.md` | Project overview, feature documentation, safety notes, limitations, and deployment information |
 
-## Viewing the published website
+## Running with Laravel Herd
 
-The project is intended to be viewed through GitHub Pages:
+This project is a Laravel application and is intended to run through Laravel Herd or Laravel’s local server.
 
-**https://mrmeralco.github.io/TeamShockValue/**
+From the Laravel project directory:
 
-If the page is not available immediately after a push, open the repository's **Settings → Pages** and confirm:
+```bash
+php artisan migrate
+php artisan serve
+```
 
-- Source: **Deploy from a branch**
-- Branch: **`main`**
-- Folder: **`/ (root)`**
+Then open `http://127.0.0.1:8000`. When using Herd, add the project as a Herd site and open its generated `.test` URL instead; `php artisan serve` is not required in that case.
 
-GitHub Pages may need a few minutes to publish a new commit.
+The default environment uses SQLite. If the database has not been initialized, run:
+
+```bash
+php artisan migrate
+```
 
 ## Demonstration flow for judges
 
-1. Open the Overview page and point out live total demand.
-2. Explain that each displayed circuit is a labeled breaker channel, not automatic appliance identification.
-3. Show the Grid Intelligence panel and explain Transformer Load, Headroom, Forecast, and Telemetry Trust.
-4. Select **Simulate neighborhood peak** to show a `WATCH` state and response recommendation.
-5. Open Breaker Channels and add or edit a channel label.
-6. Open Usage and switch between 7-, 30-, and 90-day history.
-7. Open My Bill and show measured circuit cost versus unmapped remainder.
-8. Add a plain-language Field Note, then click it to edit or delete it.
-9. Open Profile, save the account fields, and demonstrate logout returning to the login page.
+1. Open the public URL and confirm that it routes to the login page.
+2. Select **Create an account**, register, and confirm that signup opens the dashboard.
+3. Point out live total demand and explain that each displayed circuit is a labeled breaker channel.
+4. Open Channels and add or edit a channel label through CH 16.
+5. Open Usage and switch between 7-, 30-, and 90-day history.
+6. Open My Bill and show measured circuit cost versus unmapped remainder.
+7. Add a Field Note, then click it to edit or delete it.
+8. Open Profile, save the account fields, verify the avatar initials, and demonstrate logout returning to login.
 
 ## Safety and responsible use
 
@@ -193,8 +204,8 @@ This prototype is for monitoring and demonstration. It is not a certified protec
 ## Current limitations
 
 - Breaker readings are simulated in the frontend.
-- There is no connected ESP32/ESP8266, MQTT service, REST API, or database yet.
-- User accounts are local browser prototypes, not secure server-side authentication.
+- There is no connected ESP32/ESP8266 or MQTT service yet; dashboard readings remain simulated.
+- User accounts use Laravel sessions and SQLite locally; production deployments need additional security hardening.
 - Data is not synchronized between browsers or devices.
 - Appliance identification is user labeling, not full NILM disaggregation.
 - Transformer limits and forecasts are illustrative until utility/network data is available.
