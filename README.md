@@ -179,28 +179,6 @@ Other practical innovation opportunities include:
 - **Offline-first operation:** buffer readings on the gateway and synchronize after reconnection.
 - **Calibration and maintenance alerts:** detect sensor drift, stale devices, or implausible readings before they affect recommendations.
 
-## Where blockchain could be useful — and where it should not be used
-
-Blockchain is **not required for the current dashboard** and should not be used to store raw household telemetry. Putting high-frequency power readings or personal information on-chain would add cost, latency, privacy risk, and operational complexity without improving the core user experience.
-
-A narrowly scoped, optional ledger could become viable if Shockvalue later coordinates multiple parties such as households, utilities, installers, auditors, or a demand-response program. In that case, use a permissioned ledger or an external timestamped anchoring service for:
-
-- Device registration and ownership-transfer events
-- Sensor calibration certificates and installer attestations
-- Hashes of interval reports, proving that a report was not changed later
-- Demand-response event acknowledgements
-- Aggregated flexibility commitments and settlement records
-- Renewable-energy or carbon-credit provenance, when an authorized program requires it
-
-The recommended design is:
-
-1. Keep raw telemetry, personal data, and detailed reports in controlled off-chain storage.
-2. Sign device messages at the edge and verify them at ingestion.
-3. Generate a hash of an approved aggregate report, not of a raw household waveform.
-4. Anchor the hash and relevant event metadata to a permissioned ledger.
-5. Use the ledger only for shared auditability or settlement between organizations.
-
-This gives blockchain a defensible role—**tamper-evident coordination between parties**—without forcing a blockchain into a single-household monitoring problem.
 
 ## Technology stack
 
