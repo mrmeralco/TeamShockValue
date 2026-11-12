@@ -1,8 +1,14 @@
-# Shock Value
+# TeamShockValue — Meralco Shockvalue
 
 > **IoT-powered household energy intelligence for clearer bills, safer demand decisions, and a more responsive local grid.**
 
-Shockvalue is a competition-ready Laravel prototype that turns connected breaker-channel readings into an understandable view of household demand. It combines circuit-level monitoring, estimated cost, data-quality signals, and a lightweight digital twin so a homeowner or field team can answer:
+Meralco Shockvalue is an explainable circuit-level energy intelligence layer that connects household behavior to local grid conditions. It turns connected breaker-channel readings into an understandable view of demand, cost, and grid impact.
+
+This approach gives the platform a broader long-term path than a purely consumer analytics app, while remaining understandable and useful to homeowners today.
+
+## What is happening right now?
+
+Shockvalue combines data from connected breaker channels and a main-feed view to help homeowners and field teams answer:
 
 > **What is consuming power right now, how confident are we in the reading, and what is the safest next action?**
 
