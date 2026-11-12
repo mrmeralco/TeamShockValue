@@ -23,7 +23,6 @@
         <span class="live-pill"><i></i> DEVICE SYNCED</span>
         <button class="icon-button" id="notificationButton" aria-label="Open notifications">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>
-          <em>2</em>
         </button>
         <button class="button button-secondary account-button" id="authButton">Sign in</button>
         <button class="avatar" id="profileButton" aria-label="Open profile">AS</button>
@@ -35,7 +34,7 @@
         <div class="eyebrow">CONTROL ROOM</div>
         <nav class="nav-list" aria-label="Primary navigation">
           <a class="nav-item active" data-page-link="overview" href="#overview"><span class="nav-icon">◈</span><span>Overview</span></a>
-          <a class="nav-item" data-page-link="usage" href="#usage"><span class="nav-icon">◒</span><span>Usage</span><span class="nav-badge">3</span></a>
+          <a class="nav-item" data-page-link="usage" href="#usage"><span class="nav-icon">◒</span><span>Usage</span></a>
           <a class="nav-item" data-page-link="bill" href="#bill"><span class="nav-icon">▤</span><span>My bill</span></a>
           <a class="nav-item" data-page-link="devices" href="#devices"><span class="nav-icon">⌁</span><span>Devices</span></a>
           <a class="nav-item" data-page-link="observations" href="#observations"><span class="nav-icon">⌖</span><span>Field notes</span></a>
@@ -126,25 +125,28 @@
           <article class="panel usage-panel page-section" data-page-content="usage" id="usage">
             <div class="panel-heading">
               <div><div class="eyebrow">KNOW YOUR BILL / MANAGE YOUR USAGE</div><h2>Where your energy went</h2></div>
-              <div class="segmented" role="group" aria-label="Chart range"><button class="range-button active" data-range="7">7 days</button><button class="range-button" data-range="30">30 days</button><button class="range-button" data-range="90">90 days</button></div>
+              <div class="segmented" role="group" aria-label="Chart range"><button class="range-button active" data-range="7">1 week</button><button class="range-button" data-range="30">1 month</button></div>
             </div>
             <div class="chart-wrap"><canvas id="usageChart" aria-label="Energy usage for the selected period"></canvas></div>
-            <div class="chart-legend"><span><i class="legend-dot blue"></i> Actual usage</span><span><i class="legend-line"></i> Daily average</span><span class="legend-total">Peak: <b id="peakUsage">28.6 kWh</b></span></div>
+            <div class="chart-legend"><span><i class="legend-dot light-blue"></i> Previous total</span><span><i class="legend-dot blue"></i> Added that day</span><span class="legend-total">Total: <b id="peakUsage">28.6 kWh</b></span></div>
           </article>
 
           <article class="panel bill-panel page-section" data-page-content="bill" id="bill">
             <div class="eyebrow">BILL FORECAST <span class="info">i</span></div>
             <div class="bill-main"><span class="bill-amount">₱3,842</span><span class="bill-delta">↓ ₱264 <small>vs. last month</small></span></div>
-            <div class="bill-chart"><svg viewBox="0 0 380 115" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9d5ff" stop-opacity=".65"/><stop offset="1" stop-color="#b9d5ff" stop-opacity="0"/></linearGradient></defs><path class="area" d="M0 95 C20 84 30 65 45 78 S68 96 83 83 S109 50 127 65 S151 80 168 74 S190 43 209 59 S232 79 249 65 S275 32 290 48 S314 69 328 58 S352 33 380 42 V115 H0Z"/><path class="line" d="M0 95 C20 84 30 65 45 78 S68 96 83 83 S109 50 127 65 S151 80 168 74 S190 43 209 59 S232 79 249 65 S275 32 290 48 S314 69 328 58 S352 33 380 42"/></svg></div>
+            <div class="bill-range-toggle" role="group" aria-label="Bill chart range"><button class="bill-range-button active" data-bill-range="weekly">Weekly</button><button class="bill-range-button" data-bill-range="monthly">Monthly</button></div>
+            <div class="bill-chart bill-bar-chart bill-view active" data-bill-view="weekly" aria-label="Weekly bill trend"></div>
+            <div class="bill-chart bill-bar-chart bill-view" data-bill-view="monthly" aria-label="Monthly bill trend"></div>
+            <div class="bill-chart-legend"><span><i class="legend-dot blue"></i> Previous total</span><span><i class="legend-dot light-blue"></i> Added amount</span></div>
             <div class="bill-meta"><span>Billing period</span><b>01 Nov — 30 Nov</b></div>
             <div class="bill-meta"><span>Rate used</span><b>₱11.47 / kWh</b></div>
             <button class="text-button" id="viewBillButton">View bill breakdown <span>→</span></button>
           </article>
 
           <article class="panel devices-panel page-section" data-page-content="devices" id="devices">
-            <div class="panel-heading"><div><div class="eyebrow">GRID INTELLIGENCE FROM CONNECTED DEVICES</div><h2>Live circuits</h2></div><div class="device-heading-actions"><button class="button button-primary compact-button" id="addDeviceInlineButton">+ Add device</button><button class="dots" aria-label="Device options">•••</button></div></div>
+            <div class="panel-heading"><div><div class="eyebrow">GRID INTELLIGENCE FROM CONNECTED DEVICES</div><h2>Live circuits</h2></div><div class="device-heading-actions"><button class="button button-primary compact-button" id="addDeviceInlineButton">+ Add device</button><div class="devices-menu-wrap"><button class="dots" id="devicesMenuButton" aria-label="Device options" aria-haspopup="menu" aria-expanded="false">•••</button><div class="devices-menu" id="devicesMenu" role="menu" hidden><button type="button" id="removeAllDevicesButton" role="menuitem">Remove all devices</button></div></div></div></div>
             <div class="device-list" id="deviceList"></div>
-            <button class="text-button" id="allDevicesButton">View all 14 channels <span>→</span></button>
+            <button class="text-button" id="allDevicesButton">View all 16 channels <span>→</span></button>
           </article>
 
           <article class="panel challenge-panel page-section" data-page-content="observations" id="observations">
