@@ -14,28 +14,6 @@ Meralco Shockvalue is a web prototype for making household electricity usage eas
 
 Use the sidebar to switch between pages. Device labels and sample readings are saved in the current browser using `localStorage`.
 
-## Run locally
-
-The project is a static web app and does not require a build step.
-
-1. Install Python 3 or Node.js.
-2. Open a terminal in the project directory.
-3. Start a local server with either command:
-
-   ```powershell
-   python -m http.server 8000
-   ```
-
-   Or, if Python is unavailable:
-
-   ```powershell
-   npx http-server -p 8000
-   ```
-
-4. Open [http://localhost:8000](http://localhost:8000) in a browser.
-
-The dashboard loads Chart.js from a CDN, so the charts require an internet connection.
-
 ## Prototype scope and limitations
 
 This version is a frontend prototype. Breaker readings are simulated in the browser; it does **not** connect to an ESP32/ESP8266, CT clamps, a utility smart meter, or a backend. The login/signup flow does not create secure server-side accounts, and the sample bill figures are illustrative rather than an official Meralco bill or rate calculation. Browser-local data is not shared across devices and can be cleared with browser storage.
