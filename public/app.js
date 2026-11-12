@@ -85,7 +85,7 @@ function updateGridIntelligence() {
   set('#thermalCopy', danger ? 'Watch thermal envelope' : 'Normal thermal band'); set('#forecastCopy', danger ? 'Peak risk in next 60 min' : 'Trend-based estimate'); set('#telemetryCopy', trust < 94 ? 'One sample needs review' : 'Fresh sensor samples');
   const measuredCost = document.querySelector('#measuredCost'); const unmappedCost = document.querySelector('#unmappedCost'); const totalBill = 3842; const measured = Math.min(totalBill, Math.round(total * 720 / 30 * 11.47)); if (measuredCost) measuredCost.textContent = `₱${measured.toLocaleString()}`; if (unmappedCost) unmappedCost.textContent = `₱${Math.max(0, totalBill - measured).toLocaleString()}`;
   const badge = document.querySelector('#gridStatusBadge'); const statusText = document.querySelector('#gridStatusText'); if (badge && statusText) { badge.classList.toggle('alert', danger); badge.classList.toggle('stable', !danger); statusText.textContent = danger ? 'WATCH' : 'STABLE'; }
-  const alert = document.querySelector('#gridAlert'); const alertRow = document.querySelector('#gridAlertRow'); if (alert && alertRow) { alertRow.hidden = !danger; alert.innerHTML = danger ? '<span>!</span><div><strong>Neighborhood peak risk detected</strong><small>Shift flexible loads or delay the water heater to protect local headroom.</small></div>' : ''; }
+  const alertRow = document.querySelector('#gridAlertRow'); if (alertRow) alertRow.hidden = true;
 }
 
 function simulateLiveReadings() { devices = devices.map(device => ({ ...device, power: Math.max(0, Number((Number(device.power) + (Math.random() - .48) * .04).toFixed(2))) })); save(storageKeys.devices, devices); renderDevices(); addHistorySnapshot(); }
