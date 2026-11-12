@@ -1,8 +1,8 @@
-# TeamShockValue — Meralco Shockvalue
+# Shockvalue
 
 > **IoT-powered household energy intelligence for clearer bills, safer demand decisions, and a more responsive local grid.**
 
-Meralco Shockvalue is an explainable circuit-level energy intelligence layer that connects household behavior to local grid conditions. It turns connected breaker-channel readings into an understandable view of demand, cost, and grid impact.
+Shockvalue is a circuit-level energy intelligence layer that connects household behavior to local grid conditions. It turns connected breaker-channel readings into an understandable view of demand, cost, and grid impact.
 
 This approach gives the platform a broader long-term path than a purely consumer analytics app, while remaining understandable and useful to homeowners today.
 
