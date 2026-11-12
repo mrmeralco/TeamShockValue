@@ -1,4 +1,4 @@
-# TeamShockValue — Shockvalue
+Shock Value
 
 > **IoT-powered household energy intelligence for clearer bills, safer demand decisions, and a more responsive local grid.**
 
