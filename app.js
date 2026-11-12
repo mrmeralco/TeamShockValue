@@ -267,11 +267,19 @@ document.querySelector('#exportButton').addEventListener('click', () => {
   const blob = new Blob([report], { type: 'text/plain' });
   const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'meralco-shockvalue-report.txt'; link.click(); URL.revokeObjectURL(link.href);
 });
-const demoTips = [['Cool efficiently', 'Raise your air conditioner setpoint slightly and use a fan to stay comfortable.'], ['Switch off standby power', 'Unplug chargers and electronics when they are not in use.'], ['Wash full loads', 'Run the washing machine with a full load when practical.'], ['Make the most of daylight', 'Turn off lights in rooms that already have enough natural light.'], ['Keep cool air inside', 'Close doors and windows while the air conditioner is running.'], ['Maintain your refrigerator', 'Keep the door seals clean and avoid leaving the door open.'], ['Choose efficient lighting', 'Replace frequently used bulbs with energy-efficient LEDs.'], ['Plan your appliance use', 'Spread out flexible appliance use instead of running everything at once.']]; const tip = demoTips[Math.floor(Math.random() * demoTips.length)]; document.querySelector('.insight-copy strong').textContent = tip[0]; document.querySelector('.insight-copy span').textContent = tip[1];
-document.querySelector('#applyTipButton').addEventListener('click', event => { event.currentTarget.textContent = 'Tip applied ✓'; event.currentTarget.disabled = true; });
 document.querySelector('#simulatePeakButton').addEventListener('click', () => { updateGridIntelligence(true); openDialog('Neighborhood peak simulation', 'A high-demand event was simulated. The digital twin recommends delaying flexible loads and notifying field operations.', [['Transformer load', document.querySelector('#transformerLoad').textContent], ['Headroom', document.querySelector('#headroom').textContent], ['Recommended action', 'Delay water heater / EV charging']]); });
-document.querySelector('#closeInsightButton').addEventListener('click', () => document.querySelector('.insight-strip').remove());
 
+function updateDashboardClock() {
+  const now = new Date();
+  const date = new Intl.DateTimeFormat('en-PH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Manila' }).format(now).toUpperCase();
+  const time = new Intl.DateTimeFormat('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Manila' }).format(now);
+  const dateElement = document.querySelector('#dashboardLocalDate');
+  const timeElement = document.querySelector('#dashboardLocalTime');
+  if (dateElement) dateElement.textContent = date;
+  if (timeElement) timeElement.textContent = time;
+}
+updateDashboardClock();
+window.setInterval(updateDashboardClock, 1000);
 loadProfile();
 
 renderDevices();
