@@ -6,9 +6,6 @@ The project is designed around a simple question:
 
 > **What is happening on the monitored circuits right now, and what should the household or field team do next?**
 
-## Competition challenge alignment
-
-### Challenge 3 — Grid Intelligence from Connected Devices
 
 Shockvalue combines data from connected breaker channels and a main-feed view to present:
 
@@ -20,11 +17,6 @@ Shockvalue combines data from connected breaker channels and a main-feed view to
 - Telemetry Trust, which indicates whether readings are fresh and consistent enough to use
 - A peak-event simulation with a recommended demand-response action
 - An unmapped remainder so the system does not pretend to identify loads it cannot measure
-
-### Supporting challenge areas
-
-- **Challenge 2 — Know Your Bill, Manage Your Usage:** usage history, bill forecast, rate assumptions, circuit cost breakdown, and plain-language tips.
-- **Challenge 4 — Smarter Field Observation:** Field Notes let users record appliance changes, unusual bills, meter checks, and outages so later peaks have context.
 
 ## Core product idea
 
