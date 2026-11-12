@@ -33,7 +33,6 @@ The current repository is a **working web prototype**:
 - Breaker readings are simulated in the browser so the product can be demonstrated without mains-connected hardware.
 - Device mappings and history are stored in browser `localStorage` for the prototype.
 - User accounts, sessions, email changes, and password changes are backed by Laravel and SQLite.
-- No blockchain network or production IoT ingestion service is enabled yet; both are documented as carefully scoped extension points below.
 
 This distinction is intentional: the UI demonstrates the product decisions now, while the hardware and distributed-system roadmap stays technically credible.
 
@@ -257,7 +256,6 @@ This is a monitoring and demonstration prototype. It is not a certified protecti
 - Appliance identification is user labeling, not full NILM disaggregation.
 - Data is not synchronized between browsers or devices.
 - SQLite and local browser storage are suitable for demonstration, not a high-volume IoT deployment.
-- Blockchain is not implemented; it remains an optional multi-party audit and settlement extension.
 
 ## Roadmap
 
