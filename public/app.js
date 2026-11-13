@@ -45,6 +45,35 @@ function escapeHtml(value) { return String(value).replace(/[&<>\"']/g, char => (
 let devices = load(storageKeys.devices, DEFAULT_DEVICES);
 let readingsHistory = load(storageKeys.history, []);
 let currentProfile = null;
+const RECOMMENDATIONS = [
+  { id: 'aircon-setpoint', category: 'Cooling', title: 'Cool efficiently', description: 'Try a comfortable higher air-conditioner setpoint and use a fan to circulate cool air. Keep doors and windows closed while cooling.', reason: 'Cooling is commonly a major household energy use. Start with a small adjustment and compare your usage.', icon: '❄' },
+  { id: 'standby-power', category: 'Everyday savings', title: 'Switch off unused standby loads', description: 'Unplug idle chargers and switch off entertainment equipment when not needed. Do not disconnect essential or medical equipment.', reason: 'Small standby loads can accumulate over long periods.', icon: '🔌' },
+  { id: 'fridge-seals', category: 'Kitchen', title: 'Keep your refrigerator efficient', description: 'Check door seals, avoid keeping the door open, and leave ventilation space according to the manufacturer’s guidance.', reason: 'A refrigerator runs throughout the day, so maintenance and good habits can reduce unnecessary operation.', icon: '⌁' },
+  { id: 'full-loads', category: 'Everyday savings', title: 'Wash full loads when practical', description: 'Group laundry into full loads within the machine’s rated capacity and choose an appropriate efficient cycle.', reason: 'Fewer unnecessary cycles can reduce electricity and water use.', icon: '◒' },
+  { id: 'lighting', category: 'Lighting', title: 'Make the most of daylight', description: 'Turn off lights in empty rooms and use efficient LED bulbs when replacing frequently used lighting.', reason: 'Reducing unnecessary lighting runtime is a simple action you can take today.', icon: '💡' },
+  { id: 'flexible-loads', category: 'Demand awareness', title: 'Spread out flexible appliance use', description: 'When convenient, avoid starting several high-power appliances together. Shifting time alone does not reduce a flat-rate bill unless a relevant tariff or incentive applies.', reason: 'Spreading loads can reduce simultaneous demand; reducing runtime or energy consumption is what generally lowers energy charges.', icon: '⚡' },
+  { id: 'review-channels', category: 'Monitoring', title: 'Review your channel labels', description: 'Keep appliance and room labels up to date so you can understand which monitored circuits contribute to demand.', reason: 'Accurate labels make the usage and bill views easier to interpret. Unmapped loads should not be guessed.', icon: '✦' },
+  { id: 'track-progress', category: 'Monitoring', title: 'Change one habit and track the result', description: 'Choose one realistic action, then compare similar periods in Usage. Consider changes in weather, occupancy, and appliance runtime.', reason: 'A measured comparison is more useful than an assumed saving. The current dashboard is simulated and cannot verify real savings.', icon: '◈' }
+];
+let recommendationFilter = 'all';
+function renderRecommendations() {
+  const list = document.querySelector('#recommendationList');
+  if (!list) return;
+  const userKey = currentProfile?.userId || 'demo';
+  const completed = load(`shockvalue.recommendations.${userKey}`, []);
+  const visible = RECOMMENDATIONS.filter(item => recommendationFilter === 'all' || (recommendationFilter === 'done' ? completed.includes(item.id) : !completed.includes(item.id)));
+  document.querySelector('#recommendationCount').textContent = `${RECOMMENDATIONS.length} recommendations`;
+  list.innerHTML = visible.length ? visible.map(item => {
+    const done = completed.includes(item.id);
+    return `<article class="recommendation-card${done ? ' is-done' : ''}"><div class="recommendation-icon" aria-hidden="true">${escapeHtml(item.icon)}</div><div class="recommendation-content"><span class="recommendation-category">${escapeHtml(item.category)} · App guidance</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="recommendation-reason"><strong>Why this helps</strong><p>${escapeHtml(item.reason)}</p></div><button type="button" class="button ${done ? 'button-secondary' : 'button-primary'}" data-recommendation-id="${escapeHtml(item.id)}" aria-pressed="${done}">${done ? 'Done ✓ · Undo' : 'Mark as done'}</button></div></article>`;
+  }).join('') : '<div class="recommendation-empty">No recommendations in this filter. Try another view.</div>';
+  list.querySelectorAll('[data-recommendation-id]').forEach(button => button.addEventListener('click', () => {
+    const id = button.dataset.recommendationId;
+    const next = completed.includes(id) ? completed.filter(item => item !== id) : [...completed, id];
+    save(`shockvalue.recommendations.${userKey}`, next);
+    renderRecommendations();
+  }));
+}
 
 const dialog = document.querySelector('#appDialog');
 const dialogContent = document.querySelector('#dialogContent');
@@ -140,6 +169,7 @@ function editDevice(id) {
 }
 function applyProfile(profile) {
   currentProfile = profile;
+  renderRecommendations();
   const username = document.querySelector('#profileUsername'); const userId = document.querySelector('#profileUserId'); const email = document.querySelector('#profileEmail');
   if (username) username.value = profile.username; if (userId) userId.value = profile.userId; if (email) email.value = profile.email;
   const initialsText = profile.username.split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase();
@@ -262,6 +292,8 @@ document.querySelectorAll('[data-bill-range]').forEach(button => button.addEvent
   button.classList.add('active');
 }));
 
+document.querySelectorAll('[data-recommendation-filter]').forEach(button => button.addEventListener('click', () => { recommendationFilter = button.dataset.recommendationFilter; document.querySelectorAll('[data-recommendation-filter]').forEach(item => item.classList.toggle('active', item === button)); renderRecommendations(); }));
+renderRecommendations();
 document.querySelectorAll('[data-page-link]').forEach(link => link.addEventListener('click', navigate));
 window.addEventListener('hashchange', () => renderPage(window.location.hash.slice(1) || 'overview'));
 document.querySelector('#dialogClose').addEventListener('click', () => dialog.close());

@@ -37,6 +37,7 @@
           <a class="nav-item" data-page-link="usage" href="#usage"><span class="nav-icon">◒</span><span>Usage</span></a>
           <a class="nav-item" data-page-link="bill" href="#bill"><span class="nav-icon">▤</span><span>My bill</span></a>
           <a class="nav-item" data-page-link="devices" href="#devices"><span class="nav-icon">⌁</span><span>Channels</span></a>
+          <a class="nav-item" data-page-link="recommendations" href="#recommendations"><span class="nav-icon">✦</span><span>Recommendations</span></a>
           <a class="nav-item" data-page-link="profile" href="#profile"><span class="nav-icon">◎</span><span>Profile</span></a>
         </nav>
         <div class="sidebar-rule"></div>
@@ -142,6 +143,13 @@
             <div class="device-list" id="deviceList"></div>
             <button class="text-button" id="allDevicesButton">View all channels <span>→</span></button>
           </article>
+        </section>
+
+        <section class="page-section recommendations-page" data-page-content="recommendations" id="recommendations" aria-label="Energy recommendations">
+          <div class="recommendations-header"><div><div class="eyebrow">INSIGHTS / ACTION CENTER</div><h2>Your recommendations</h2><p>Practical steps to reduce waste, understand your usage, and manage your energy costs.</p></div><span class="page-chip" id="recommendationCount">0 recommendations</span></div>
+          <div class="recommendation-filters" role="group" aria-label="Filter recommendations"><button type="button" class="recommendation-filter active" data-recommendation-filter="all">All</button><button type="button" class="recommendation-filter" data-recommendation-filter="new">To try</button><button type="button" class="recommendation-filter" data-recommendation-filter="done">Done</button></div>
+          <div class="recommendation-list" id="recommendationList"></div>
+          <p class="recommendation-footer">Never open a breaker panel or change wiring yourself. Contact a licensed electrician for electrical concerns.</p>
         </section>
 
         <section class="page-section bill-extra-panel" data-page-content="bill" aria-label="Bill intelligence">
